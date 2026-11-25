@@ -7,6 +7,16 @@
  * Version: 1.0.0
  *
  * Classes:
+ *
+ *   tlib.Util
+ *       sleep(ms)
+ *           Waits asynchronously for the specified milliseconds.
+ *           Returns: Promise<void>
+ *
+ *       log(text1, text2, text3, text4, text5)
+ *           Logs text to console and appends it to the document.
+ *           Returns: void
+ *
  *   tlib.CrossTabBridge
  *
  * CrossTabBridge methods:
@@ -22,6 +32,9 @@
  *       messages after successful processing.
  *
  * Example:
+ *
+ *   await tlib.Util.sleep(1000);
+ *   tlib.Util.log("Hello World");
  *
  *   const result = await tlib.CrossTabBridge.open(
  *       "https://example.com/",
@@ -49,6 +62,55 @@
 
     const tlib = root.tlib || {};
 
+    // ============================================================
+    // Util
+    // ============================================================
+
+    /**
+     * Utility functions for delays and on-page logging.
+     *
+     * sleep(ms): Waits for the specified time; returns a Promise.
+     * log(text1, text2, text3, text4, text5): Logs to console
+     * and appends the combined text to the document; returns nothing.
+     */
+    class Util {
+
+        /**
+         * Waits for the specified number of milliseconds.
+         * @param {number} ms - Delay in milliseconds.
+         * @returns {Promise<void>} Resolves after the delay.
+         */
+        static sleep(ms) {
+            console.debug("[tlib.Util] sleep:", ms, "ms");
+            return new Promise(resolve => setTimeout(resolve, ms));
+        }
+
+        /**
+         * Writes a message to the console and appends it to the page.
+         * @param {*} text1 - First text part.
+         * @param {*} text2 - Optional second text part.
+         * @param {*} text3 - Optional third text part.
+         * @param {*} text4 - Optional fourth text part.
+         * @param {*} text5 - Optional fifth text part.
+         * @returns {void}
+         */
+        static log(text1, text2 = "", text3 = "", text4 = "", text5 = "") {
+
+            const text = text1 + text2 + text3 + text4 + text5;
+
+            console.log("Log: " + text);
+            console.debug("[tlib.Util] Appending log message to document.");
+
+            const txt = document.createElement("pre");
+            txt.style.fontSize = "12px";
+            txt.textContent = text;
+            txt.style.whiteSpace = "pre-wrap";
+            txt.style.marginTop = "2px";
+            txt.style.color = text1.includes("[ERROR]") ? "#990000" : "#000000";
+
+            document.body.appendChild(txt);
+        }
+    }
 
     // ============================================================
     // CrossTabBridge
@@ -59,7 +121,6 @@
         static VERSION = "1.0.0";
 
         static DEFAULT_TIMEOUT = 15000;
-
 
         /**
          * Opens a new tab, waits for the receiver to become ready,
@@ -88,7 +149,6 @@
          *       "Hello!"
          *   );
          */
-
         static async open(url, data, options = {}) {
 
             const timeout = options.timeout ?? this.DEFAULT_TIMEOUT;
@@ -189,7 +249,6 @@
             });
         }
 
-
         /**
          * Sends data to an already open tab.
          *
@@ -225,7 +284,6 @@
          *       "https://example.com"
          *   );
          */
-
         static async send(
             targetWindow,
             data,
@@ -323,7 +381,6 @@
             });
         }
 
-
         /**
          * Registers a message receiver.
          *
@@ -353,7 +410,6 @@
          *       console.log("Received:", data);
          *   });
          */
-
         static receive(callback, options = {}) {
 
             const allowedOrigins = options.allowedOrigins ??
@@ -449,11 +505,11 @@
 
     }
 
-
     // ============================================================
     // Export
     // ============================================================
 
+    tlib.Util = Util;
     tlib.CrossTabBridge = CrossTabBridge;
 
     root.tlib = tlib;
